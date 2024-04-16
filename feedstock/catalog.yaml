@@ -4,8 +4,8 @@ tags:
   - my-custom-tag
   - zarr
 stores:
-  - id: "metaflux_daily"
+  - id: "metaflux-daily"
     url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/metaflux_daily.zarr"
 
-  - id: "metaflux_monthly"
+  - id: "metaflux-monthly"
     url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/meatflux_monthly.zarr"
