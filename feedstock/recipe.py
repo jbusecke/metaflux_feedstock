@@ -1,11 +1,14 @@
 """
-A synthetic prototype recipe
+MetaFlux is a global, long-term carbon flux dataset of gross
+primary production and ecosystem respiration that is generated
+using meta-learning. This dataset will be added to the existing
+rodeo forecast model in order to improve its performances."
 """
 
 import zarr
 import os
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Any
 import apache_beam as beam
 from datetime import datetime, timezone
 from pangeo_forge_recipes.patterns import pattern_from_file_sequence
@@ -34,11 +37,15 @@ class Copy(beam.PTransform):
         # We do need the gs:// prefix?
         # TODO: Determine this dynamically from zarr.storage.FSStore
         source = f"gs://{os.path.normpath(store.path)}/"  # FIXME more elegant. `.copytree` needs trailing slash
-        fs = gcsfs.GCSFileSystem()  # FIXME: How can we generalize this?
-        fs.cp(source, self.target, recursive=True)
-        # return a new store with the new path that behaves exactly like the input
-        # to this stage (so we can slot this stage right before testing/logging stages)
-        return zarr.storage.FSStore(self.target)
+        if self.target is False:
+            # dont do anything
+            return store
+        else:
+            fs = gcsfs.GCSFileSystem()  # FIXME: How can we generalize this?
+            fs.cp(source, self.target, recursive=True)
+            # return a new store with the new path that behaves exactly like the input
+            # to this stage (so we can slot this stage right before testing/logging stages)
+            return zarr.storage.FSStore(self.target)
 
     def expand(self, pcoll: beam.PCollection) -> beam.PCollection:
         return pcoll | "Copying Store" >> beam.Map(self._copy)
@@ -60,11 +67,25 @@ class InjectAttrs(beam.PTransform):
     ) -> beam.PCollection[zarr.storage.FSStore]:
         return pcoll | "Injecting Attributes" >> beam.Map(self._update_zarr_attrs)
 
+def get_pangeo_forge_build_attrs()-> dict[str, Any]:
+    """Get build information (git hash and time) to add to the recipe output"""
+    # Set up injection attributes
+    # This is for demonstration purposes only and should be discussed with the broader LEAP/PGF community
+    # - Bake in information from the top level of the meta.yaml
+    # - Add a timestamp
+    # - Add the git hash
+    # - Add link to the meta.yaml on main
+    # - Add the recipe id
+
+    git_url_hash = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/commit/{os.environ['GITHUB_SHA']}"
+    timestamp = datetime.now(timezone.utc).isoformat()
+    
+    return {
+        "pangeo_forge_build_git_hash": git_url_hash,
+        "pangeo_forge_build_timestamp": timestamp,
+    }
 
 # TODO: Both these stages are generally useful. They should at least be in the utils package, maybe in recipes?
-
-# load the global config values (we will have to decide where these ultimately live)
-catalog_meta = yaml.load(open("feedstock/catalog.yaml"))
 
 
 def find_recipe_meta(catalog_meta: List[Dict[str, str]], r_id: str) -> Dict[str, str]:
@@ -78,71 +99,67 @@ def find_recipe_meta(catalog_meta: List[Dict[str, str]], r_id: str) -> Dict[str,
     )
     return None  # Return None if no matching dictionary is found
 
+# load the global config values (we will have to decide where these ultimately live)
+catalog_meta = yaml.load(open("feedstock/catalog.yaml"))
 
-# Set up injection attributes
-# This is for demonstration purposes only and should be discussed with the broader LEAP/PGF community
-# - Bake in information from the top level of the meta.yaml
-# - Add a timestamp
-# - Add the git hash
-# - Add link to the meta.yaml on main
-# - Add the recipe id
+print('DETECTING GITHUB ACTIONS RUN')
+if os.getenv('GITHUB_ACTIONS') == 'true':
+    print("Running inside GitHub Actions.")
 
-git_url_hash = f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/commit/{os.environ['GITHUB_SHA']}"
-timestamp = datetime.now(timezone.utc).isoformat()
+    # Get final store path from catalog.yaml input
+    target_daily = find_recipe_meta(catalog_meta["stores"], "metaflux_daily")["url"]
+    target_monthly = find_recipe_meta(catalog_meta["stores"], "metaflux_monthly")["url"]
+    pgf_build_attrs = get_pangeo_forge_build_attrs()
+else:
+    print("Running locally. Deactivating final copy stage.")
+    # this deactivates the final copy stage for local testing execution
+    target_daily = False
+    target_monthly = False
+    pgf_build_attrs = {}
+    
+print("Final output locations")
+print(f"{target_daily=}")
+print(f"{target_monthly=}")
+print(f"{pgf_build_attrs=}")
 
-injection_attrs = {
-    "pangeo_forge_build_git_hash": git_url_hash,
-    "pangeo_forge_build_timestamp": timestamp,
-}
+# Common Parameters
+years = range(2001, 2022)
+months = range(1, 13)
+dataset_url = 'https://zenodo.org/record/7761881/files'
 
 ## Monthly version
-input_urls_a = [
-    "gs://cmip6/pgf-debugging/hanging_bug/file_a.nc",
-    "gs://cmip6/pgf-debugging/hanging_bug/file_b.nc",
-]
-input_urls_b = [
-    "gs://cmip6/pgf-debugging/hanging_bug/file_a_huge.nc",
-    "gs://cmip6/pgf-debugging/hanging_bug/file_b_huge.nc",
-]
+input_urls_monthly = [f'{dataset_url}/METAFLUX_GPP_RECO_monthly_{y}.nc' for y in years]
 
-pattern_a = pattern_from_file_sequence(input_urls_a, concat_dim="time")
-pattern_b = pattern_from_file_sequence(input_urls_b, concat_dim="time")
-
-print(f"{catalog_meta=}")
-target_small = find_recipe_meta(catalog_meta["stores"], "small")["url"]
-target_large = find_recipe_meta(catalog_meta["stores"], "large")["url"]
-print(f"{target_small=}")
-print(f"{target_large=}")
-
-# small recipe
-small = (
-    beam.Create(pattern_a.items())
-    | OpenURLWithFSSpec()
+pattern_monthly = pattern_from_file_sequence(input_urls_monthly, concat_dim='time')
+METAFLUX_GPP_RECO_monthly = (
+    beam.Create(pattern_monthly.items())
+    | OpenURLWithFSSpec()  # open_kwargs=open_kwargs
     | OpenWithXarray()
     | StoreToZarr(
-        store_name="small.zarr",
-        # FIXME: This is brittle. it needs to be named exactly like in meta.yaml...
-        # Can we inject this in the same way as the root?
-        # Maybe its better to find another way and avoid injections entirely...
-        combine_dims=pattern_a.combine_dim_keys,
+        store_name='METAFLUX_GPP_RECO_monthly.zarr',
+        combine_dims=pattern_monthly.combine_dim_keys,
     )
-    | InjectAttrs(injection_attrs)
+    | InjectAttrs(pgf_build_attrs)
     | ConsolidateDimensionCoordinates()
     | ConsolidateMetadata()
-    | Copy(target=target_small)
+    | Copy(target=target_monthly)
 )
 
-# larger recipe
-large = (
-    beam.Create(pattern_b.items())
-    | OpenURLWithFSSpec()
+## daily version
+input_urls_daily = [
+    f'{dataset_url}/METAFLUX_GPP_RECO_daily_{y}{m:02}.nc' for y in years for m in months
+]
+pattern_daily = pattern_from_file_sequence(input_urls_daily, concat_dim='time')
+METAFLUX_GPP_RECO_daily = (
+    beam.Create(pattern_daily.items())
+    | OpenURLWithFSSpec()  # open_kwargs=open_kwargs
     | OpenWithXarray()
     | StoreToZarr(
-        store_name="large.zarr",
-        combine_dims=pattern_b.combine_dim_keys,
+        store_name='METAFLUX_GPP_RECO_daily.zarr',
+        combine_dims=pattern_daily.combine_dim_keys,
     )
-    | InjectAttrs(injection_attrs)
+    | InjectAttrs(pgf_build_attrs)
     | ConsolidateDimensionCoordinates()
     | ConsolidateMetadata()
-    | Copy(target=target_large)
+    | Copy(target=target_daily)
 )

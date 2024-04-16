@@ -4,13 +4,8 @@ tags:
   - my-custom-tag
   - zarr
 stores:
-  - id: "small"
-    name: "The cool small Proto Dataset"
-    url: "gs://leap-scratch/data-library/feedstocks/latest/proto_feedstock/small.zarr"
-    "ncviewjs:rechunking":
-      - path: "gs://some-bucket/small.zarr"
-        use_case: "multiscales"
+  - id: "metaflux_daily"
+    url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/metaflux_daily.zarr"
 
-  - id: "large"
-    name: "The even cooler large Proto Dataset" # no pyramids
-    url: "gs://leap-scratch/data-library/feedstocks/latest/proto_feedstock/large.zarr"
+  - id: "metaflux_monthly"
+    url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/meatflux_monthly.zarr"
