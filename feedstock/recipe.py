@@ -110,8 +110,8 @@ if os.getenv("GITHUB_ACTIONS") == "true":
     print("Running inside GitHub Actions.")
 
     # Get final store path from catalog.yaml input
-    target_daily = find_recipe_meta(catalog_meta["stores"], "metaflux_daily")["url"]
-    target_monthly = find_recipe_meta(catalog_meta["stores"], "metaflux_monthly")["url"]
+    target_daily = find_recipe_meta(catalog_meta["stores"], "metaflux-daily")["url"]
+    target_monthly = find_recipe_meta(catalog_meta["stores"], "metaflux-monthly")["url"]
     pgf_build_attrs = get_pangeo_forge_build_attrs()
 else:
     print("Running locally. Deactivating final copy stage.")
