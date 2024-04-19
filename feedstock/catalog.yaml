@@ -5,7 +5,7 @@ tags:
   - zarr
 stores:
   - id: "metaflux-daily"
-    url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/metaflux_daily.zarr"
+    url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/metaflux_daily.zarr"
 
   - id: "metaflux-monthly"
-    url: "gs://leap-scratch/data-library/feedstocks/latest/metaflux_feedstock/meatflux_monthly.zarr"
+    url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/meatflux_monthly.zarr"
