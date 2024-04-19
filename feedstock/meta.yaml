@@ -1,20 +1,27 @@
-title: "LEAP Data Library Prototype"
+title: "MetaFlux"
 description: >
-  A prototype test for the LEAP Data Library refactor
+  MetaFlux: Meta-learning global carbon fluxes from sparse spatiotemporal observations
 recipes:
-  - id: "small"
-    object: "recipe:small"
-  - id: "large"
-    object: "recipe:large"
-provenance:
-  providers:
-    - name: "Julius"
-      description: "Just a guy testing some recipes. Nothing to see here."
-      roles:
-        - producer
-        - licensor
-  license: "Just a Test"
+  - id: "metaflux-daily"
+    object: "recipe:METAFLUX_GPP_RECO_daily"
+  - id: "metaflux-monthly"
+    object: "recipe:METAFLUX_GPP_RECO_monthly"
+
 maintainers:
   - name: "Julius Busecke"
     orcid: "0000-0001-8571-865X"
     github: jbusecke
+
+provenance:
+  providers:
+    - name: "Zenodo"
+      description: "Zenodo"
+      roles:
+        - host
+      url: https://zenodo.org/record/7761881#.ZFv9OS-B30p
+    - name: "Nathaniel et al."
+      description: "Authors of MetaFlux: Meta-learning global carbon fluxes from sparse spatiotemporal observations"
+      roles:
+        - producer
+        - licensor
+  license: "CC-BY-4.0"
