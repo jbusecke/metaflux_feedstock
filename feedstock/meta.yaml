@@ -3,8 +3,10 @@ description: >
   MetaFlux: Meta-learning global carbon fluxes from sparse spatiotemporal observations
 recipes:
   - id: "metaflux-daily"
+    name: "METAFLUX_GPP_RECO_daily"
     object: "recipe:METAFLUX_GPP_RECO_daily"
   - id: "metaflux-monthly"
+    name: "METAFLUX_GPP_RECO_monthly"
     object: "recipe:METAFLUX_GPP_RECO_monthly"
 
 maintainers:
