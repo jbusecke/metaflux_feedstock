@@ -5,7 +5,9 @@ tags:
   - zarr
 stores:
   - id: "metaflux-daily"
+    name: "METAFLUX_GPP_RECO_daily"
     url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/metaflux_daily.zarr"
 
   - id: "metaflux-monthly"
+    name: "METAFLUX_GPP_RECO_monthly"
     url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/meatflux_monthly.zarr"
