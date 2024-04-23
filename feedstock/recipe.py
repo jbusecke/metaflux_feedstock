@@ -49,7 +49,7 @@ input_urls_monthly = [f"{dataset_url}/METAFLUX_GPP_RECO_monthly_{y}.nc" for y in
 pattern_monthly = pattern_from_file_sequence(input_urls_monthly, concat_dim="time")
 METAFLUX_GPP_RECO_monthly = (
     beam.Create(pattern_monthly.items())
-    | OpenURLWithFSSpec(max_concurrency=2)
+    | OpenURLWithFSSpec(max_concurrency=1)
     | OpenWithXarray()
     | StoreToZarr(
         store_name="METAFLUX_GPP_RECO_monthly.zarr",
@@ -68,7 +68,7 @@ input_urls_daily = [
 pattern_daily = pattern_from_file_sequence(input_urls_daily, concat_dim="time")
 METAFLUX_GPP_RECO_daily = (
     beam.Create(pattern_daily.items())
-    | OpenURLWithFSSpec(max_concurrency=2)
+    | OpenURLWithFSSpec(max_concurrency=1)
     | OpenWithXarray()
     | StoreToZarr(
         store_name="METAFLUX_GPP_RECO_daily.zarr",
