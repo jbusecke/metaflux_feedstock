@@ -55,7 +55,7 @@ METAFLUX_GPP_RECO_monthly = (
         store_name="METAFLUX_GPP_RECO_monthly.zarr",
         combine_dims=pattern_monthly.combine_dim_keys,
     )
-    | InjectAttrs(pgf_build_attrs)
+    | InjectAttrs()
     | ConsolidateDimensionCoordinates()
     | ConsolidateMetadata()
     | Copy(target=catalog_store_urls["metaflux-monthly"])
@@ -74,7 +74,7 @@ METAFLUX_GPP_RECO_daily = (
         store_name="METAFLUX_GPP_RECO_daily.zarr",
         combine_dims=pattern_daily.combine_dim_keys,
     )
-    | InjectAttrs(pgf_build_attrs)
+    | InjectAttrs()
     | ConsolidateDimensionCoordinates()
     | ConsolidateMetadata()
     | Copy(target=catalog_store_urls["metaflux-daily"])
