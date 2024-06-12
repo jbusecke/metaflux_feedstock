@@ -11,3 +11,11 @@ stores:
   - id: "metaflux-monthly"
     name: "METAFLUX_GPP_RECO_monthly"
     url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/meatflux_monthly.zarr"
+
+  - id: "metaflux-daily-pyramid"
+    name: "METAFLUX_GPP_RECO_daily_pyramid_3_lvl"
+    url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/metaflux_daily_pyramid_3_lvl.zarr"
+
+  - id: "metaflux-monthly-pyramid"
+    name: "METAFLUX_GPP_RECO_monthly_pyramid_3_lvl"
+    url: "gs://leap-persistent-ro/data-library/feedstocks/metaflux_feedstock/meatflux_monthly_pyramid_3_lvl.zarr"
