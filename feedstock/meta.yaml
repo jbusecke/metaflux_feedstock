@@ -6,6 +6,10 @@ recipes:
     object: "recipe:METAFLUX_GPP_RECO_daily"
   - id: "metaflux-monthly"
     object: "recipe:METAFLUX_GPP_RECO_monthly"
+  - id: "metaflux-monthly-pyramid"
+    object: "pyarmid:monthly_pyramid"
+  - id: "metaflux-monthly-pyramid"
+    object: "pyramid:daily_pyramid"
 
 maintainers:
   - name: "Julius Busecke"

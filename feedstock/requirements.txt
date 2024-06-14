@@ -2,3 +2,7 @@ pangeo-forge-recipes==0.10.7
 apache-beam[gcp]
 gcsfs
 leap-data-management-utils==0.0.5
+git+https://github.com/carbonplan/pangeo-forge-ndpyramid
+git+https://github.com/carbonplan/ndpyramid@resample-blocks
+pyresample
+dask
